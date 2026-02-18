@@ -55,3 +55,5 @@ celerybeat.pid
 
 # Jupyter
 .ipynb_checkpoints/
+
+temporalenv/
