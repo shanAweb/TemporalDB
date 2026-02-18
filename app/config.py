@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     # ── PostgreSQL ───────────────────────────────────────
     postgres_host: str = "localhost"
-    postgres_port: int = 5432
+    postgres_port: int = 5433
     postgres_user: str = "temporaldb"
     postgres_password: str = "temporaldb"
     postgres_db: str = "temporaldb"
@@ -43,13 +43,13 @@ class Settings(BaseSettings):
         )
 
     # ── Neo4j ────────────────────────────────────────────
-    neo4j_uri: str = "bolt://localhost:7687"
+    neo4j_uri: str = "bolt://localhost:7688"
     neo4j_user: str = "neo4j"
     neo4j_password: str = "temporaldb"
 
     # ── Redis ────────────────────────────────────────────
     redis_host: str = "localhost"
-    redis_port: int = 6379
+    redis_port: int = 6380
     redis_db: int = 0
     redis_password: str = ""
 
@@ -60,7 +60,7 @@ class Settings(BaseSettings):
         return f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
 
     # ── Kafka / Redpanda ─────────────────────────────────
-    kafka_bootstrap_servers: str = "localhost:9092"
+    kafka_bootstrap_servers: str = "localhost:29092"
     kafka_ingestion_topic: str = "document.ingested"
     kafka_consumer_group: str = "temporaldb-nlp"
 
