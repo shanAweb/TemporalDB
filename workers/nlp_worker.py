@@ -15,6 +15,7 @@ import structlog
 from aiokafka import AIOKafkaConsumer
 
 from app.config import settings
+from app.nlp.pipeline import run_pipeline
 
 logger = structlog.get_logger(__name__)
 
@@ -63,11 +64,21 @@ async def process_message(message: dict) -> None:
         filename=payload.get("filename"),
     )
 
-    # ── Phase 4 hook ─────────────────────────────────────────────────────────
-    # TODO: replace with actual NLP pipeline call, e.g.:
-    #   await run_nlp_pipeline(document_id)
-    logger.info("nlp_worker_pipeline_placeholder", document_id=document_id)
-    # ─────────────────────────────────────────────────────────────────────────
+    text: str = payload.get("text", "")
+    if not text:
+        logger.warning("nlp_worker_empty_text", document_id=document_id)
+        return
+
+    result = await run_pipeline(text)
+    logger.info(
+        "nlp_worker_pipeline_complete",
+        document_id=document_id,
+        entities=len(result.entities),
+        events=len(result.events),
+        linked_entities=len(result.linked_entities),
+        causal_relations=len(result.causal_relations),
+    )
+    # Storage layer (Phase 5) will persist result to PostgreSQL and Neo4j.
 
 
 async def consume_loop(consumer: AIOKafkaConsumer) -> None:
