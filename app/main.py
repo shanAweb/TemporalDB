@@ -6,10 +6,13 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api.middleware import RequestLoggingMiddleware
+from app.api.routes import entities, events, graph, ingest, query
 from app.config import settings
-from app.database.postgres import init_postgres, close_postgres
-from app.database.neo4j import init_neo4j, close_neo4j
-from app.database.redis import init_redis, close_redis
+from app.database.neo4j import close_neo4j, init_neo4j
+from app.database.postgres import close_postgres, init_postgres
+from app.database.redis import close_redis, init_redis
+from app.ingestion.producer import close_kafka_producer, init_kafka_producer
 
 logger = structlog.get_logger(__name__)
 
@@ -29,11 +32,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await init_redis()
     logger.info("redis_connected")
 
+    await init_kafka_producer()
+    logger.info("kafka_producer_started")
+
     logger.info("startup_complete")
     yield
 
     # ── Shutdown ─────────────────────────────────────────
     logger.info("shutting_down")
+    await close_kafka_producer()
     await close_redis()
     await close_neo4j()
     await close_postgres()
@@ -50,7 +57,9 @@ app = FastAPI(
 )
 
 # ── Middleware ────────────────────────────────────────────
+# Order matters: outermost middleware runs first on request, last on response.
 
+app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -77,7 +86,7 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
 
 # ── Health Check ─────────────────────────────────────────
 
-@app.get("/health")
+@app.get("/health", tags=["Health"])
 async def health_check() -> dict:
     return {
         "status": "healthy",
@@ -87,10 +96,9 @@ async def health_check() -> dict:
 
 
 # ── Routers ──────────────────────────────────────────────
-# Will be added as API routes are built in Phase 7:
-# from app.api.routes import query, ingest, events, entities, graph
-# app.include_router(query.router, prefix="/query", tags=["Query"])
-# app.include_router(ingest.router, prefix="/ingest", tags=["Ingest"])
-# app.include_router(events.router, prefix="/events", tags=["Events"])
-# app.include_router(entities.router, prefix="/entities", tags=["Entities"])
-# app.include_router(graph.router, prefix="/graph", tags=["Graph"])
+
+app.include_router(query.router,    prefix="/query",    tags=["Query"])
+app.include_router(ingest.router,   prefix="/ingest",   tags=["Ingest"])
+app.include_router(events.router,   prefix="/events",   tags=["Events"])
+app.include_router(entities.router, prefix="/entities", tags=["Entities"])
+app.include_router(graph.router,    prefix="/graph",    tags=["Graph"])
