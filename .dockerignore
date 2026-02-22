@@ -1,0 +1,64 @@
+# Version control
+.git
+.gitignore
+
+# Python bytecode
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+temporalenv/
+venv/
+.venv/
+env/
+
+# Test artifacts
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Environment files (never bake secrets into the image)
+.env
+.env.*
+!.env.example
+
+# Claude
+.claude/
+
+# Documentation
+README.md
+LICENSE
+
+# Docker files (no need to copy into the image)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Logs
+*.log
+logs/
+
+# Model weight files (downloaded during build, not committed)
+*.bin
+*.onnx
+*.pt
+*.safetensors
+
+# Misc
+*.egg-info/
+dist/
+build/

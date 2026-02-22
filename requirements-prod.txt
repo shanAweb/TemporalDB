@@ -1,0 +1,47 @@
+# Web Framework
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+
+# Database - PostgreSQL (async)
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+pgvector==0.3.6
+alembic==1.14.1
+
+# Database - Neo4j
+neo4j==5.27.0
+
+# Database - Redis (async)
+redis==5.2.1
+
+# Message Bus - Kafka
+aiokafka==0.12.0
+
+# Validation & Settings
+pydantic==2.10.4
+pydantic-settings==2.7.1
+
+# NLP
+spacy==3.8.3
+dateparser==1.2.1
+rapidfuzz==3.11.0
+
+# Embeddings
+sentence-transformers==3.3.1
+
+# Document Parsing
+PyMuPDF==1.25.3
+python-docx==1.1.2
+
+# LLM - Ollama (OpenAI-compatible client)
+httpx==0.28.1
+
+# Task Queue
+celery[redis]==5.4.0
+
+# Logging
+structlog==24.4.0
+
+# Environment
+python-dotenv==1.0.1
