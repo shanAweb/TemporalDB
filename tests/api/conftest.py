@@ -20,6 +20,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
+from app.database.neo4j import get_neo4j
 from app.database.postgres import get_db
 from app.database.redis import get_redis
 from app.main import app
@@ -51,6 +52,11 @@ async def _mock_get_redis() -> AsyncMock:  # type: ignore[override]
     yield AsyncMock()
 
 
+async def _mock_get_neo4j() -> AsyncMock:  # type: ignore[override]
+    """Async generator override for the get_neo4j dependency."""
+    yield AsyncMock()
+
+
 @pytest.fixture()
 def client() -> TestClient:  # type: ignore[return]
     """
@@ -61,6 +67,7 @@ def client() -> TestClient:  # type: ignore[return]
     """
     app.dependency_overrides[get_db] = _mock_get_db
     app.dependency_overrides[get_redis] = _mock_get_redis
+    app.dependency_overrides[get_neo4j] = _mock_get_neo4j
 
     with (
         patch("app.main.init_postgres"),
