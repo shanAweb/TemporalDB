@@ -64,6 +64,7 @@ COPY --from=builder --chown=appuser:appuser \
 # Application directory
 WORKDIR /app
 COPY --chown=appuser:appuser app/       ./app/
+COPY --chown=appuser:appuser workers/   ./workers/
 COPY --chown=appuser:appuser alembic/   ./alembic/
 COPY --chown=appuser:appuser alembic.ini .
 

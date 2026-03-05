@@ -99,6 +99,61 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # ── TemporalDB API Server ───────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SPACY_MODEL: en_core_web_trf
+        EMBEDDING_MODEL: all-MiniLM-L6-v2
+    container_name: temporaldb-api
+    env_file: .env.docker
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── TemporalDB NLP Worker ───────────────────────────
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: temporaldb-worker
+    env_file: .env.docker
+    command: ["python", "-m", "workers.nlp_worker"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Database Migrations (run once) ──────────────────
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: temporaldb-migrate
+    env_file: .env.docker
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
 volumes:
   postgres_data:
   neo4j_data:

@@ -61,7 +61,12 @@ async def publish(
     logger.debug("kafka_message_published", topic=topic, event_type=event_type)
 
 
-async def publish_document_ingested(document_id: str, source: str, filename: str | None = None) -> None:
+async def publish_document_ingested(
+    document_id: str,
+    source: str,
+    filename: str | None = None,
+    text: str = "",
+) -> None:
     """Publish a document.ingested event to trigger NLP processing."""
     await publish(
         topic=settings.kafka_ingestion_topic,
@@ -70,6 +75,7 @@ async def publish_document_ingested(document_id: str, source: str, filename: str
             "document_id": document_id,
             "source": source,
             "filename": filename,
+            "text": text,
         },
         key=document_id,
     )

@@ -134,6 +134,7 @@ async def _ingest_text(
             document_id=str(document.id),
             source=source,
             filename=filename,
+            text=normalised,
         )
     except Exception as exc:  # noqa: BLE001
         # Non-fatal: the document is saved; the worker can be triggered later.
