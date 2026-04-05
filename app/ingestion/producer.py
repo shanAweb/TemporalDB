@@ -93,3 +93,31 @@ async def publish_document_processed(document_id: str, event_count: int, entity_
         },
         key=document_id,
     )
+
+
+async def publish_connector_sync_completed(
+    connector_id: str,
+    run_id: str,
+    connector_type: str,
+    status: str,
+    items_ingested: int,
+    items_skipped: int,
+) -> None:
+    """Publish a connector.sync.completed audit event.
+
+    Fire-and-forget — consumers (dashboards, webhooks) can subscribe to
+    ``connector.sync.completed`` for real-time sync observability.
+    """
+    await publish(
+        topic=settings.kafka_connector_topic,
+        event_type="connector.sync.completed",
+        payload={
+            "connector_id": connector_id,
+            "run_id": run_id,
+            "connector_type": connector_type,
+            "status": status,
+            "items_ingested": items_ingested,
+            "items_skipped": items_skipped,
+        },
+        key=connector_id,
+    )

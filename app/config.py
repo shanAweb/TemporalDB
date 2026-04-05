@@ -63,6 +63,7 @@ class Settings(BaseSettings):
     kafka_bootstrap_servers: str = "localhost:29092"
     kafka_ingestion_topic: str = "document.ingested"
     kafka_consumer_group: str = "temporaldb-nlp"
+    kafka_connector_topic: str = "connector.sync.completed"
 
     # ── Ollama ───────────────────────────────────────────
     ollama_base_url: str = "http://localhost:11434"

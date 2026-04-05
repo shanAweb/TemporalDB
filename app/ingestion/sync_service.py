@@ -37,7 +37,7 @@ from app.database.postgres import async_session_factory
 from app.ingestion.connectors.registry import get_connector
 from app.ingestion.deduplicator import check_and_register, compute_fingerprint
 from app.ingestion.normalizer import normalize
-from app.ingestion.producer import publish_document_ingested
+from app.ingestion.producer import publish_connector_sync_completed, publish_document_ingested
 from app.models.sql.document import Document
 from app.storage import connector_store
 from app.utils.crypto import decrypt_credentials
@@ -236,6 +236,20 @@ async def run_sync(connector_id: uuid.UUID) -> ConnectorSyncResult:
             last_sync_status=status,
         )
         await session.commit()
+
+    # Publish audit event (fire-and-forget; swallow errors so a Kafka hiccup
+    # never masks a successful sync result)
+    try:
+        await publish_connector_sync_completed(
+            connector_id=str(connector_id),
+            run_id=str(run_id),
+            connector_type=connector.connector_type,
+            status=status,
+            items_ingested=items_ingested,
+            items_skipped=items_skipped,
+        )
+    except Exception:
+        log.warning("connector_sync_audit_publish_failed", connector_id=str(connector_id))
 
     log.info(
         "connector_sync_complete",
