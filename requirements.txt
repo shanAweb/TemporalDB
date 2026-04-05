@@ -43,6 +43,9 @@ celery[redis]==5.4.0
 # Encryption (connector credential storage)
 cryptography==44.0.0
 
+# Connector schedule evaluation
+croniter==3.0.3
+
 # Logging
 structlog==24.4.0
 

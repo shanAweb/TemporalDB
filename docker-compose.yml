@@ -141,6 +141,38 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # ── Celery Worker (connector syncs) ────────────────
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: temporaldb-celery-worker
+    env_file: .env.docker
+    command: ["celery", "-A", "workers.celery_worker.celery_app", "worker", "--loglevel=info", "--concurrency=4"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Celery Beat (connector scheduler) ──────────────
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: temporaldb-celery-beat
+    env_file: .env.docker
+    command: ["celery", "-A", "workers.celery_worker.celery_app", "beat", "--loglevel=info"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
   # ── Database Migrations (run once) ──────────────────
   migrate:
     build:

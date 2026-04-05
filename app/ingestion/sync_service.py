@@ -32,8 +32,8 @@ from datetime import datetime, timezone
 import structlog
 from redis.asyncio import Redis
 
+from app.config import settings
 from app.database.postgres import async_session_factory
-from app.database.redis import _get_pool
 from app.ingestion.connectors.registry import get_connector
 from app.ingestion.deduplicator import check_and_register, compute_fingerprint
 from app.ingestion.normalizer import normalize
@@ -122,7 +122,8 @@ async def run_sync(connector_id: uuid.UUID) -> ConnectorSyncResult:
 
     # ── 4. Fetch → transform → normalize → deduplicate → persist ─────────────
     connector_instance = get_connector(connector.connector_type)
-    redis = Redis(connection_pool=_get_pool())
+    # Create a self-contained Redis client — no pool init required in worker context
+    redis = Redis.from_url(settings.redis_url, decode_responses=True)
 
     items_fetched = 0
     items_ingested = 0
