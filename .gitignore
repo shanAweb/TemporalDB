@@ -57,3 +57,5 @@ celerybeat.pid
 .ipynb_checkpoints/
 
 temporalenv/
+
+.env.docker

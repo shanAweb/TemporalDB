@@ -88,6 +88,16 @@ class Settings(BaseSettings):
     # ── Connectors ───────────────────────────────────────
     credentials_encryption_key: str = ""  # 64-char hex string (32 bytes) for AES-256-GCM
 
+    # ── OAuth ────────────────────────────────────────────────
+    app_base_url: str = "http://localhost:8000"
+    frontend_base_url: str = "http://localhost:3000"
+    jira_oauth_client_id: str = ""
+    jira_oauth_client_secret: str = ""
+    clickup_oauth_client_id: str = ""
+    clickup_oauth_client_secret: str = ""
+    timedoctor_oauth_client_id: str = ""
+    timedoctor_oauth_client_secret: str = ""
+
     # ── Server ───────────────────────────────────────────
     host: str = "0.0.0.0"
     port: int = 8000

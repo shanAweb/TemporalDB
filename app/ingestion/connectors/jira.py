@@ -25,6 +25,15 @@ class JiraConnector(ExternalConnector):
     @staticmethod
     def _client(credentials: dict) -> httpx.AsyncClient:
         base_url = credentials["base_url"].rstrip("/")
+        if credentials.get("auth_type") == "oauth":
+            return httpx.AsyncClient(
+                base_url=base_url,
+                headers={
+                    "Accept": "application/json",
+                    "Authorization": f"Bearer {credentials['access_token']}",
+                },
+                timeout=30.0,
+            )
         auth = httpx.BasicAuth(credentials["email"], credentials["api_token"])
         return httpx.AsyncClient(
             base_url=base_url,

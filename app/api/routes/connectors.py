@@ -24,6 +24,7 @@ import uuid
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import require_api_key
@@ -205,14 +206,14 @@ async def update_connector(
 
 @router.delete(
     "/{connector_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
     summary="Delete a connector",
 )
 async def delete_connector(
     connector_id: uuid.UUID,
     pg_session: AsyncSession = Depends(get_db),
     _key: str = Depends(require_api_key),
-) -> None:
+) -> dict:
     """Delete a connector and all its sync history.
 
     This is irreversible. The CASCADE constraint on ``connector_sync_runs``
@@ -225,6 +226,7 @@ async def delete_connector(
             detail=f"Connector {connector_id} not found.",
         )
     logger.info("connector_deleted", connector_id=str(connector_id))
+    return {"deleted": True}
 
 
 # ── Trigger sync ──────────────────────────────────────────────────────────────
