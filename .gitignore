@@ -58,4 +58,5 @@ celerybeat.pid
 
 temporalenv/
 
-.env.docker
+.env.docker.env.docker
+*.env*
