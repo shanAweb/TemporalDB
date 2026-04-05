@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__mcp-context__get_context",
+      "mcp__mcp-context__start_tracking_session",
+      "mcp__mcp-context__log_user_prompt",
+      "mcp__mcp-context__log_assistant_response",
+      "Bash(which pandoc:*)",
+      "Bash(python3:*)",
+      "Bash(\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\":*)"
+    ]
+  }
+}
