@@ -84,6 +84,9 @@ class Settings(BaseSettings):
     def celery_result_backend(self) -> str:
         return self.redis_url
 
+    # ── Connectors ───────────────────────────────────────
+    credentials_encryption_key: str = ""  # 64-char hex string (32 bytes) for AES-256-GCM
+
     # ── Server ───────────────────────────────────────────
     host: str = "0.0.0.0"
     port: int = 8000
