@@ -75,8 +75,17 @@ class ConnectorSyncResult:
 # ── Main entry point ──────────────────────────────────────────────────────────
 
 
-async def run_sync(connector_id: uuid.UUID) -> ConnectorSyncResult:
+async def run_sync(
+    connector_id: uuid.UUID,
+    existing_run_id: uuid.UUID | None = None,
+) -> ConnectorSyncResult:
     """Run a full sync cycle for the given connector.
+
+    Args:
+        connector_id:    UUID of the connector to sync.
+        existing_run_id: If the API already created a ConnectorSyncRun row
+                         (e.g. for "Sync Now"), pass its ID here so the
+                         service skips creating a duplicate row.
 
     Safe to call concurrently for different connectors; the same connector
     should not be run in parallel (Celery Beat ensures this by design).
@@ -114,11 +123,14 @@ async def run_sync(connector_id: uuid.UUID) -> ConnectorSyncResult:
 
     log.info("connector_sync_starting", connector_type=connector.connector_type, cursor=cursor)
 
-    # ── 3. Create sync run ────────────────────────────────────────────────────
-    async with async_session_factory() as session:
-        sync_run = await connector_store.create_sync_run(session, connector_id)
-        await session.commit()
-        run_id = sync_run.id
+    # ── 3. Create (or reuse) sync run ─────────────────────────────────────────
+    if existing_run_id is not None:
+        run_id = existing_run_id
+    else:
+        async with async_session_factory() as session:
+            sync_run = await connector_store.create_sync_run(session, connector_id)
+            await session.commit()
+            run_id = sync_run.id
 
     # ── 4. Fetch → transform → normalize → deduplicate → persist ─────────────
     connector_instance = get_connector(connector.connector_type)

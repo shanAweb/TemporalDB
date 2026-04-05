@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.middleware import RequestLoggingMiddleware
-from app.api.routes import entities, events, graph, ingest, query
+from app.api.routes import connectors, entities, events, graph, ingest, query
 from app.config import settings
 from app.database.neo4j import close_neo4j, init_neo4j
 from app.database.postgres import close_postgres, init_postgres
@@ -97,8 +97,9 @@ async def health_check() -> dict:
 
 # ── Routers ──────────────────────────────────────────────
 
-app.include_router(query.router,    prefix="/query",    tags=["Query"])
-app.include_router(ingest.router,   prefix="/ingest",   tags=["Ingest"])
-app.include_router(events.router,   prefix="/events",   tags=["Events"])
-app.include_router(entities.router, prefix="/entities", tags=["Entities"])
-app.include_router(graph.router,    prefix="/graph",    tags=["Graph"])
+app.include_router(query.router,      prefix="/query",      tags=["Query"])
+app.include_router(ingest.router,     prefix="/ingest",     tags=["Ingest"])
+app.include_router(events.router,     prefix="/events",     tags=["Events"])
+app.include_router(entities.router,   prefix="/entities",   tags=["Entities"])
+app.include_router(graph.router,      prefix="/graph",      tags=["Graph"])
+app.include_router(connectors.router, prefix="/connectors", tags=["Connectors"])

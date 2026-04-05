@@ -21,27 +21,35 @@ logger = structlog.get_logger(__name__)
     max_retries=3,
     default_retry_delay=60,
 )
-def sync_connector_task(self, connector_id: str) -> dict:
+def sync_connector_task(self, connector_id: str, run_id: str | None = None) -> dict:
     """Run a full sync cycle for a single connector.
+
+    Args:
+        connector_id: UUID string of the connector.
+        run_id:       UUID string of a pre-created ConnectorSyncRun row,
+                      supplied when triggered via the "Sync Now" API endpoint.
 
     Wraps the async ``run_sync()`` orchestrator for Celery's sync task runner.
     Retries up to 3 times on unexpected failures with a 60-second delay.
     """
     try:
-        return asyncio.run(_async_run_sync(connector_id))
+        return asyncio.run(_async_run_sync(connector_id, run_id))
     except Exception as exc:
         logger.error("sync_connector_task_failed", connector_id=connector_id, error=str(exc))
         raise self.retry(exc=exc)
 
 
-async def _async_run_sync(connector_id: str) -> dict:
+async def _async_run_sync(connector_id: str, run_id: str | None = None) -> dict:
     """Initialize services, run sync, and clean up."""
     from app.ingestion.producer import init_kafka_producer, close_kafka_producer
     from app.ingestion.sync_service import run_sync
 
     await init_kafka_producer()
     try:
-        result = await run_sync(uuid.UUID(connector_id))
+        result = await run_sync(
+            uuid.UUID(connector_id),
+            existing_run_id=uuid.UUID(run_id) if run_id else None,
+        )
         return result.as_dict()
     finally:
         await close_kafka_producer()
@@ -106,6 +114,6 @@ async def _async_poll_and_schedule() -> None:
                 )
 
 
-def _enqueue(connector_id: uuid.UUID) -> None:
-    sync_connector_task.delay(str(connector_id))
+def _enqueue(connector_id: uuid.UUID, run_id: uuid.UUID | None = None) -> None:
+    sync_connector_task.delay(str(connector_id), str(run_id) if run_id else None)
     logger.info("connector_sync_enqueued", connector_id=str(connector_id))
